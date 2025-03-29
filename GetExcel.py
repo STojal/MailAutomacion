@@ -48,33 +48,34 @@ microsoft_domains = [
 ]
 
 for mail in listMails:
-    print(mail)
-    em=EmailMessage()
-    if(str(mail).split('@')[1] in microsoft_domains):
-        
-        smtp_server = "smtp.office365.com"
-        smtp_port = 587
-        em['From'] =email_sender
-        continue
-    else:
-        smtp_server = 'smtp.gmail.com'
-        smtp_port=465
-        use_ssl=True
-        em['From'] =outlock_mail
-    print(f'Using server {smtp_server} on port {smtp_port}')
-    
-    
-    
+    print(f"\nSending to: {mail}")
+    domain = mail.split('@')[1].lower()
+
+    em = EmailMessage()
     em['To'] = mail
     em['Subject'] = subject
     em.set_content(body)
+
     context = ssl.create_default_context()
-    if use_ssl:
-        with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as smtp:
-            smtp.login(email_sender, email_password)
-            smtp.sendmail(email_sender, mail, em.as_string())
-    else:
+
+    if domain in microsoft_domains:
+        smtp_server = "smtp.office365.com"
+        smtp_port = 587
+        sender_email = outlock_mail
+        sender_pass = outlock_pass
+        em['From'] = sender_email
         with smtplib.SMTP(smtp_server, smtp_port) as smtp:
             smtp.starttls(context=context)
-            smtp.login(outlock_mail, outlock_pass)
-            smtp.sendmail(email_sender, mail, em.as_string())
+            smtp.login(sender_email, sender_pass)
+            smtp.sendmail(sender_email, mail, em.as_string())
+    else:
+        smtp_server = 'smtp.gmail.com'
+        smtp_port = 465
+        sender_email = email_sender
+        sender_pass = email_password
+        em['From'] = sender_email
+        with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context) as smtp:
+            smtp.login(sender_email, sender_pass)
+            smtp.sendmail(sender_email, mail, em.as_string())
+
+    print(f"✔️ Sent successfully using {smtp_server}")
