@@ -1,0 +1,1 @@
+Small project that goes to a excel spread sheet and takes the list of mails and send a mail to all of them 
